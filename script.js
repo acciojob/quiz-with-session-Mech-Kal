@@ -1,46 +1,77 @@
-// Restore saved progress
+// -------------------- QUESTIONS DATA --------------------
+const questions = [
+  {
+    question: "What is the capital of France?",
+    choices: ["Paris", "London", "Berlin", "Madrid"],
+    answer: "Paris",
+  },
+  {
+    question: "What is the highest mountain in the world?",
+    choices: ["Everest", "Kilimanjaro", "Denali", "Matterhorn"],
+    answer: "Everest",
+  },
+  {
+    question: "What is the largest country by area?",
+    choices: ["Russia", "China", "Canada", "United States"],
+    answer: "Russia",
+  },
+  {
+    question: "Which is the largest planet in our solar system?",
+    choices: ["Earth", "Jupiter", "Mars"],
+    answer: "Jupiter",
+  },
+  {
+    question: "What is the capital of Canada?",
+    choices: ["Toronto", "Montreal", "Vancouver", "Ottawa"],
+    answer: "Ottawa",
+  },
+];
+
+// -------------------- RESTORE PROGRESS --------------------
 let userAnswers = JSON.parse(sessionStorage.getItem("progress")) || [];
 
+// DOM elements
 const questionsElement = document.getElementById("questions");
 const scoreElement = document.getElementById("score");
 const submitBtn = document.getElementById("submit");
 
-// ---- RENDER QUESTIONS ----
+
+// -------------------- RENDER QUESTIONS --------------------
 function renderQuestions() {
-  questionsElement.innerHTML = "";
+  questionsElement.innerHTML = ""; // Important: clean container first
 
   questions.forEach((q, index) => {
-    const wrapper = document.createElement("div"); // Cypress expects <div>
+    const wrapper = document.createElement("div"); // Cypress checks div children
 
-    // QUESTION TEXT
-    const qText = document.createElement("p");
-    qText.textContent = q.question;
-    wrapper.appendChild(qText);
+    const p = document.createElement("p");
+    p.textContent = q.question;
+    wrapper.appendChild(p);
 
-    // OPTIONS
     q.choices.forEach(choice => {
-      const option = document.createElement("input");
-      option.type = "radio";
-      option.name = `question-${index}`;
-      option.value = choice;
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `question-${index}`;
+      input.value = choice;
 
-      // Restore saved selection
-      if (userAnswers[index] === choice) option.checked = true;
+      if (userAnswers[index] === choice) {
+        input.checked = true; // restore saved progress
+      }
 
-      option.addEventListener("change", () => {
+      input.addEventListener("change", () => {
         userAnswers[index] = choice;
         sessionStorage.setItem("progress", JSON.stringify(userAnswers));
       });
 
-      wrapper.appendChild(option);
+      wrapper.appendChild(input);
       wrapper.appendChild(document.createTextNode(choice));
     });
 
-    questionsElement.appendChild(wrapper); // critical for Cypress
+    questionsElement.appendChild(wrapper);
   });
 }
 
-// ---- SUBMIT ----
+
+// -------------------- SUBMIT SCORE --------------------
 submitBtn.addEventListener("click", () => {
   let score = 0;
 
@@ -49,14 +80,17 @@ submitBtn.addEventListener("click", () => {
   });
 
   scoreElement.textContent = `Your score is ${score} out of 5.`;
+
   localStorage.setItem("score", score);
 });
 
-// ---- RESTORE SCORE ----
-const storedScore = localStorage.getItem("score");
-if (storedScore) {
-  scoreElement.textContent = `Your score is ${storedScore} out of 5.`;
+
+// -------------------- RESTORE SAVED SCORE --------------------
+const savedScore = localStorage.getItem("score");
+if (savedScore !== null) {
+  scoreElement.textContent = `Your score is ${savedScore} out of 5.`;
 }
 
-// Initial load
+
+// -------------------- INITIAL RENDER --------------------
 renderQuestions();
