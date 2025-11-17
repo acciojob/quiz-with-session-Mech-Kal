@@ -38,10 +38,10 @@ const submitBtn = document.getElementById("submit");
 
 // -------------------- RENDER QUESTIONS --------------------
 function renderQuestions() {
-  questionsElement.innerHTML = ""; // Important: clean container first
+  questionsElement.innerHTML = "";
 
   questions.forEach((q, index) => {
-    const wrapper = document.createElement("div"); // Cypress checks div children
+    const wrapper = document.createElement("div");
 
     const p = document.createElement("p");
     p.textContent = q.question;
@@ -53,13 +53,23 @@ function renderQuestions() {
       input.name = `question-${index}`;
       input.value = choice;
 
+      // Restore checked state (Cypress requires checked="true")
       if (userAnswers[index] === choice) {
-        input.checked = true; // restore saved progress
+        input.setAttribute("checked", "true");
+        input.checked = true;
       }
 
       input.addEventListener("change", () => {
         userAnswers[index] = choice;
         sessionStorage.setItem("progress", JSON.stringify(userAnswers));
+
+        // Clear previously checked attribute
+        document
+          .querySelectorAll(`input[name="question-${index}"]`)
+          .forEach(r => r.removeAttribute("checked"));
+
+        // Set checked="true" for Cypress
+        input.setAttribute("checked", "true");
       });
 
       wrapper.appendChild(input);
@@ -69,7 +79,6 @@ function renderQuestions() {
     questionsElement.appendChild(wrapper);
   });
 }
-
 
 // -------------------- SUBMIT SCORE --------------------
 submitBtn.addEventListener("click", () => {
